@@ -123,6 +123,15 @@ public class Operations
             case "tanh" : answer = tanh(dinput);
             break;
 
+            case "1/x" : answer = inverse(dinput);
+            break;
+            case "%" : answer = divide(dinput,100);
+            break;
+            case "sqrt" : answer = sqrt(dinput);
+            break;
+            case "log" : answer = log(dinput);
+            break;
+
         } 
         return String.valueOf(answer);
     }
