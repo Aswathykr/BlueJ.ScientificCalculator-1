@@ -15,33 +15,30 @@ import java.text.NumberFormat;
 import javax.swing.text.MaskFormatter;
 import java.awt.event.*;
 
-public class DisplayConsole {
-
-    final private String [] operators = {"sin", "cos", "tan", "cosh", "tanh", "sinh", "x!", 
-            "1/x", "%", "sqrt", "log", "+/-"};
-    final private String [] operators2 = {"+", "-", "*", "/","pow", "Clear"} ;
-    private String operand1 = "0";
-    private String operand2 = "0";   
-    private String operator = "";
-    private Operations operations;
-
-    public static void main(String[] args) 
+/**
+ * class GUIDisplay subclassing CalculatorIO
+ *
+ * @author (Aswathy Kanakarajan)
+ * @version (02/09/2019)
+ */
+public class GUIDisplay extends CalculatorIO{
+    /**
+     * Constructs the Calculator Object
+     */
+    public GUIDisplay()
     {
-    
-        
-        new DisplayConsole();
+        operations = new Operations();
+        initCalculatorWindow();
     }
     
-    public DisplayConsole()
+    private void initCalculatorWindow()
     {
-        
-        operations = new Operations();
 
         JFrame guiFrame = new JFrame();
         //make sure the program exits when the frame closes
         guiFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         guiFrame.setTitle("My Calculator");
-        guiFrame.setSize(300,300);
+        guiFrame.setSize(300,320);
         //This will center the JFrame in the middle of the screen
         guiFrame.setLocationRelativeTo(null);
         
@@ -58,19 +55,27 @@ public class DisplayConsole {
         JTextField expression = new JTextField("", 20);
         setNumericOnly(expression);
         //Clear Button
-        JButton clearBut = new JButton("Evaluate" );
-        clearBut.addActionListener(new ActionListener()
+        JButton evaluateBut = new JButton("Evaluate" );
+        evaluateBut.addActionListener(new ActionListener()
         {
             @Override
             public void actionPerformed(ActionEvent event)
             {
+                operand2 = expression.getText();
+                operand1 = display.getText();
                 if(!operator.isEmpty() && !operand1.isEmpty()){
-                    String output = operations.calc(operator, operand1,expression.getText());
+                   String output = operations.calcDoubleOperand(
+                                                 GUIDisplay.this);
                     operator = "";
                     operand1 = ""; 
                     operand2 = "";
+                    answer = output;
                     display.setText(output);
                     expression.setText(output);
+                    if(output.equals("Infinity") || output.equals("NaN"))
+                    {
+                        expression.setEditable(false);
+                    }
                 }
                 
             }
@@ -78,7 +83,7 @@ public class DisplayConsole {
 
         topPanel.add(display);
         topPanel.add(expression);
-        topPanel.add(clearBut);
+        topPanel.add(evaluateBut);
 
         JButton[] singleOperandBut = new JButton[operators.length];
 
@@ -95,6 +100,7 @@ public class DisplayConsole {
                     @Override
                     public void actionPerformed(ActionEvent event)
                     {
+                        expression.setEditable(true);
                         String op = event.getActionCommand();
                         if(op.equals("Clear")) {
                             expression.setText("");
@@ -102,23 +108,33 @@ public class DisplayConsole {
                             operand1 = "";
                             operand2 = "";
                             operator = "";
+                            answer = "";
                             expression.requestFocusInWindow();
+                    
                         }
                         else{
                             if(operator.isEmpty()){
                                 operator = op;
                                 operand1 = expression.getText();
+                                display.setText(operand1);
                                 expression.setText("");
                                 expression.requestFocusInWindow();
                             }else{
+                                operand1 = display.getText();
                                 operand2 = expression.getText();
                                 if(!operand2.isEmpty()){
-                                    String output = operations.calc(operator, operand1, operand2);
+                                    String output = operations.
+                                            calcDoubleOperand(GUIDisplay.this);
                                     display.setText(output);
+                                    answer = output;
                                     operator = op;
                                     operand1 = output;
                                     operand2 = "";
                                     expression.setText("");
+                                    if(output.equals("Infinity") || output.equals("NaN"))
+                                    {
+                                        expression.setEditable(false);
+                                    }
                                 }
                                 expression.requestFocusInWindow();
                                 
@@ -140,22 +156,36 @@ public class DisplayConsole {
                     @Override
                     public void actionPerformed(ActionEvent event)
                     {
-                        String op = event.getActionCommand();
-                        String input = expression.getText();
+                        expression.setEditable(true);
+                        String oldOperator = operator;
+                        operator = event.getActionCommand();
+                        operand1 = expression.getText();
                         String output = "";
-                        if(!input.isEmpty()){
-                            if(op.equals("+/-")){
-                                output = String.valueOf(0 - Double.parseDouble(input));
-                            }else{
-                                output = operations.calc(op, input);
-                            }
-                             
+                        if(operator.startsWith("M"))
+                        {
+                            output = operations.calcSingleOperand
+                                                      (GUIDisplay.this);
+                            expression.setText(output);
+                            operator = oldOperator;
+                            
+                        }
+                        else if(!operand1.isEmpty()){
+                            output = operations.calcSingleOperand
+                                                      (GUIDisplay.this);
                             display.setText(output);
                             expression.setText(output);
+                            operator = ""; // Operation is done clear it
+                            if(output.equals("Infinity") || output.equals("NaN"))
+                            {
+                                expression.setEditable(false);
+                            }
                         }
                         else{
                             expression.requestFocusInWindow();
+                            operator = ""; // Operation is done clear it
                         }
+                        answer = output;
+                        
                     }
                 });
 
@@ -170,9 +200,18 @@ public class DisplayConsole {
         guiFrame.add(bottomPanel,BorderLayout.SOUTH);
         //make sure the JFrame is visible
         guiFrame.setVisible(true);
+        //Add evaluate as default ction
+        guiFrame.getRootPane().setDefaultButton(evaluateBut);
+        
         expression.requestFocusInWindow();
     }
     
+    /**
+     * Allow only digits in the textfield
+     *
+     * @param  jTextField  TextField that needs restriction
+     * @return    nil
+     */
     public static void setNumericOnly(JTextField jTextField){
         jTextField.addKeyListener(new KeyAdapter() {
              public void keyTyped(KeyEvent e) {

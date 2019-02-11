@@ -1,4 +1,5 @@
 import java.math.BigInteger;
+import java.text.*;
 /**
  * Write a description of class Operations here.
  *
@@ -7,24 +8,20 @@ import java.math.BigInteger;
  */
 public class Operations
 {
-    // instance variables - replace the example below with your own
-    private int x;
 
     /**
      * Constructor for objects of class Operations
      */
     public Operations()
     {
-
-         
-        x = 0;
     }
 
     /**
-     * An example of a method - replace this comment with your own
+     * Adds two double values and returns a double
      *
-     * @param  y  a sample parameter for a method
-     * @return    the sum of x and y
+     * @param  input1  first value for addition
+     *         input2  second value for addition
+     * @return    the sum of input1 and input2
      */
     public double add(double input1, double input2)
     {
@@ -101,11 +98,17 @@ public class Operations
         return 1/input1; 
     }
 
-    public String calc(String operator, String input){
+    public String calcSingleOperand(CalculatorIO displayObject){
         //sin(input);
-        double dinput = Double.parseDouble(input); 
+        double dinput = 0;
+        String operand1 = displayObject.getOperand1();
+        if(!operand1.isEmpty()){
+            dinput = Double.parseDouble(displayObject.getOperand1()); 
+        }
         double answer = 0;
-        switch(operator){
+        String strAnswer = "";
+        boolean handledStr = false;
+        switch(displayObject.getOperator()){
             case "sin" : answer = sin(dinput);
             break;
             case "cos" : answer = cos(dinput);
@@ -114,7 +117,9 @@ public class Operations
             break;
 
             case "x!" : BigInteger bigAnswer = factorial((int)dinput);
-
+                        NumberFormat formatter = new DecimalFormat("0.######E0");
+                        strAnswer = formatter.format(bigAnswer);
+                        handledStr = true;
             break; 
             case "sinh" : answer = sinh(dinput);
             break;
@@ -131,16 +136,28 @@ public class Operations
             break;
             case "log" : answer = log(dinput);
             break;
-
+            case "+/-" : answer = 0 - dinput;
+            break;
+            case "M+" : displayObject.setMemoryValue(displayObject.getOperand1());
+                        answer = dinput;
+            break;
+            case "MC" : displayObject.setMemoryValue("0");
+                        strAnswer = operand1;
+                        handledStr = true;
+            break;
+            case "MRC" : answer = Double.parseDouble(displayObject.getMemoryValue()); ;
+            break;
         } 
-        return String.valueOf(answer);
+        if(!handledStr)
+            strAnswer = String.valueOf(answer);
+        return strAnswer;
     }
 
-    public String calc(String operator, String input1, String input2){
-        double  dinput1 = Double.parseDouble(input1);
-        double  dinput2 = Double.parseDouble(input2);
+    public String calcDoubleOperand(CalculatorIO displayObject){
+        double  dinput1 = Double.parseDouble(displayObject.getOperand1());
+        double  dinput2 = Double.parseDouble(displayObject.getOperand2());
         double answer = 0;
-        switch (operator){
+        switch (displayObject.getOperator()){
             case "+" : answer = add(dinput1 , dinput2);
             break;
             case "-" : answer = subtract(dinput1,dinput2);
