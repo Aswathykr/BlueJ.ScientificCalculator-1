@@ -100,11 +100,7 @@ public class Operations
 
     public String calcSingleOperand(CalculatorIO displayObject){
         //sin(input);
-        double dinput = 0;
-        String operand1 = displayObject.getOperand1();
-        if(!operand1.isEmpty()){
-            dinput = Double.parseDouble(displayObject.getOperand1()); 
-        }
+        double dinput = displayObject.getOperand1();
         double answer = 0;
         String strAnswer = "";
         boolean handledStr = false;
@@ -116,9 +112,8 @@ public class Operations
             case "tan" : answer = tan(dinput);
             break;
 
-            case "x!" : BigInteger bigAnswer = factorial((int)dinput);
-                        NumberFormat formatter = new DecimalFormat("0.######E0");
-                        strAnswer = formatter.format(bigAnswer);
+            case "x!" : BigInteger bigAnswer = factorial((int)dinput);                        NumberFormat formatter = new DecimalFormat("0.######E0");
+                        strAnswer = displayObject.getFormattedString(bigAnswer);
                         handledStr = true;
             break; 
             case "sinh" : answer = sinh(dinput);
@@ -141,21 +136,34 @@ public class Operations
             case "M+" : displayObject.setMemoryValue(displayObject.getOperand1());
                         answer = dinput;
             break;
-            case "MC" : displayObject.setMemoryValue("0");
-                        strAnswer = operand1;
-                        handledStr = true;
+            case "MC" : displayObject.setMemoryValue(0);
+                        answer = dinput;
             break;
-            case "MRC" : answer = Double.parseDouble(displayObject.getMemoryValue()); ;
+            
+            case "MRC" : answer = displayObject.getMemoryValue();
+            break;
+            
+            case "Hex" : displayObject.setDisplayType(CalculatorIO.DisplayType.HexaDecimal);
+                        answer = dinput;
+            break;
+            case "Dec" : displayObject.setDisplayType(CalculatorIO.DisplayType.Decimal);
+                        answer = dinput;
+            break;
+            case "Oct" : displayObject.setDisplayType(CalculatorIO.DisplayType.Octal);
+                        answer = dinput;
+            break;
+            case "Bin" : displayObject.setDisplayType(CalculatorIO.DisplayType.Binary);
+                        answer = dinput;
             break;
         } 
         if(!handledStr)
-            strAnswer = String.valueOf(answer);
+            strAnswer = displayObject.getFormattedString(answer);
         return strAnswer;
     }
 
     public String calcDoubleOperand(CalculatorIO displayObject){
-        double  dinput1 = Double.parseDouble(displayObject.getOperand1());
-        double  dinput2 = Double.parseDouble(displayObject.getOperand2());
+        double  dinput1 = displayObject.getOperand1();
+        double  dinput2 = displayObject.getOperand2();
         double answer = 0;
         switch (displayObject.getOperator()){
             case "+" : answer = add(dinput1 , dinput2);
@@ -172,7 +180,7 @@ public class Operations
             break;
 
         }
-        return String.valueOf(answer);  
+        return displayObject.getFormattedString(answer);
     } 
 }
 

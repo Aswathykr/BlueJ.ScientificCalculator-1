@@ -38,7 +38,7 @@ public class GUIDisplay extends CalculatorIO{
         //make sure the program exits when the frame closes
         guiFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         guiFrame.setTitle("My Calculator");
-        guiFrame.setSize(300,320);
+        guiFrame.setSize(350,320);
         //This will center the JFrame in the middle of the screen
         guiFrame.setLocationRelativeTo(null);
         
@@ -90,7 +90,7 @@ public class GUIDisplay extends CalculatorIO{
         JButton[] doubleOperandBut = new JButton[operators2.length];
         
         final JPanel middlePanel = new JPanel();
-        GridLayout experimentLayout2 = new GridLayout(0,3);
+        GridLayout experimentLayout2 = new GridLayout(0,4);
         middlePanel.setLayout(experimentLayout2);
         for(Integer i = 0; i < operators2.length ; i++){
             doubleOperandBut[i] = new JButton(operators2[i] );
@@ -147,7 +147,7 @@ public class GUIDisplay extends CalculatorIO{
         }
 
         final JPanel bottomPanel = new JPanel();
-        GridLayout experimentLayout = new GridLayout(0,3);
+        GridLayout experimentLayout = new GridLayout(0,4);
         bottomPanel.setLayout(experimentLayout);
         for(Integer i = 0; i < operators.length ; i++){
             singleOperandBut[i] = new JButton(operators[i] );
@@ -161,7 +161,8 @@ public class GUIDisplay extends CalculatorIO{
                         operator = event.getActionCommand();
                         operand1 = expression.getText();
                         String output = "";
-                        if(operator.startsWith("M"))
+                        String displayFormatOperator = "HexOctDecBin";
+                        if(operator.startsWith("M") || displayFormatOperator.contains(operator))
                         {
                             output = operations.calcSingleOperand
                                                       (GUIDisplay.this);
@@ -212,15 +213,44 @@ public class GUIDisplay extends CalculatorIO{
      * @param  jTextField  TextField that needs restriction
      * @return    nil
      */
-    public static void setNumericOnly(JTextField jTextField){
+    public void setNumericOnly(JTextField jTextField){
         jTextField.addKeyListener(new KeyAdapter() {
              public void keyTyped(KeyEvent e) {
                char c = e.getKeyChar();
-               if (((!Character.isDigit(c) && (c != '.'))||
-                  (c == KeyEvent.VK_BACK_SPACE) ||
-                  (c == KeyEvent.VK_DELETE))) {
-                    e.consume();
-                  }
+               switch(displayType){
+                   case HexaDecimal : 
+                   char charC = Character.toUpperCase(c);
+                       if ((!Character.isDigit(c) && (charC <='A' || charC > 'F'))||
+                          (c == KeyEvent.VK_BACK_SPACE) ||
+                          (c == KeyEvent.VK_DELETE)) {
+                            e.consume();
+                       }
+                   break;
+                   case Binary : 
+                       if ((!Character.isDigit(c) ||(Character.digit(c,10) > 1)||
+                          (c == KeyEvent.VK_BACK_SPACE) ||
+                          (c == KeyEvent.VK_DELETE))) {
+                            e.consume();
+                       }
+                   break;
+                   case Octal : 
+                     
+                       if ((!Character.isDigit(c) ||(Character.digit(c,10) > 7)||
+                          (c == KeyEvent.VK_BACK_SPACE) ||
+                          (c == KeyEvent.VK_DELETE))) {
+                            e.consume();
+                       }
+                   break;
+                   case Decimal : 
+                      if (((!Character.isDigit(c) && (c != '.'))||
+                      (c == KeyEvent.VK_BACK_SPACE) ||
+                      (c == KeyEvent.VK_DELETE))) {
+                        e.consume();
+                      }
+                   break;
+                }
+
+               
              }
         });
     }    
